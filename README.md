@@ -3,4 +3,4 @@ This is a research project for analyzing newcomers behavior in Wikipedia current
 
 Analysis is using R
 
-Data collection and data cleaning is using Python
+Data collection and pre-processing is using Python
