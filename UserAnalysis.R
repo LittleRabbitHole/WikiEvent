@@ -108,7 +108,6 @@ summary(as.factor(revert_data$user_type))
 summary(as.factor(revert_data$event))
 sum(revert_data$vandal)
 table(revert_data$user_type, revert_data$vandal)
-#sum(revert_data$revert_goodFaithEdit)
 sum(revert_data$citation_source_link_verification)
 sum(revert_data$orginalResearch)
 sum(revert_data$neutral)
@@ -198,47 +197,3 @@ model = glmer(neutral ~
               data = revert_data, family = binomial)
 summary(model)
 #event ebola and fifa more neutral
-
-setwd("/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data")
-setwd("/Users/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data")
-newcomers = read.csv("all_survival_final.csv")
-colnames(newcomers)
-fifa_newcomers = newcomers[c("user", "userid")][which(newcomers$event == "FIFA"),]
-ebola_newcomers = newcomers[c("user", "userid")][which(newcomers$event == "Ebola"),]
-blm_newcomers = newcomers[c("user", "userid")][which(newcomers$event == "BLM"),]
-
-setwd("/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data/2014-BLM")
-setwd("/Users/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data/2014-FIFA")
-contridata = read.csv("event_newcomer_contri_usertype.csv")
-newcomers_contri =  merge(contridata, blm_newcomers,  by=c("userid"))
-
-length(unique(contridata$userid))
-length(unique(newcomers_contri$userid))
-summary(as.factor(newcomers_contri$ns))
-
-
-###useless
-#check distribution
-user_type1 = qual_data[which(qual_data$usertype==1),]
-
-##revert unit analysis
-revision_revert = read.csv("newcomers_contri_revert.csv")
-
-#check the quality histogram
-qual_data = read.csv("editor_goodfalse_aggre.csv")
-qual_data = read.csv("user_revert_aggre.csv")
-
-fifa_data = qual_data[which(qual_data$event == "fifa"),]
-#fifa_data_group1 = fifa_data$ave_true[which(fifa_data$user_type==1)] 
-fifa_data_group1 = fifa_data$revert_ratio[which(fifa_data$user_type==1)] 
-hist(fifa_data_group1)
-
-ebola_data = qual_data[which(qual_data$event == "ebola"),]
-#ebola_data_group1 = ebola_data$ave_true[which(ebola_data$user_type==1)] 
-ebola_data_group1 = ebola_data$revert_ratio[which(ebola_data$user_type==1)] 
-hist(ebola_data_group1)
-
-blm_data = qual_data[which(qual_data$event == "blm"),]
-#blm_data_group1 = blm_data$ave_true[which(blm_data$user_type==1)] 
-blm_data_group1 = blm_data$revert_ratio[which(blm_data$user_type==1)] 
-hist(blm_data_group1)
