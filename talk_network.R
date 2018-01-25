@@ -36,7 +36,7 @@ talk_net <- function(session_edge){
   return (session_net)
 }
 
-#results for three sessions
+#results for talk network
 
 session_all.net = talk_net(all_edge)
 session_all.net = simplify(session_all.net, remove.multiple = FALSE, remove.loops = TRUE) #remove self loop
