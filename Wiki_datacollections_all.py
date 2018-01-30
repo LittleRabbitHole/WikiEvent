@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Sep 29 10:01:00 2017
-This is for all the re0usable functions
+This is for all the reusable all functions
 for import and use for other code
 @author: angli
 """
@@ -92,10 +92,10 @@ def isInWindow(c):
         return (0)
 
 def timeNewcomers(c):
-    if c['register-event'] <= 30 and c['register-event'] >= -11: 
+    if c['register-event'] <= 15 and c['register-event'] >= 0: 
     #if c['register-event'] >= -11: 
         return (1)
-    elif c['register-event'] > 30:
+    elif c['register-event'] > 15:
         return (2)
     else:
         return (0)
@@ -107,7 +107,7 @@ def isEarlyExperience(c):
         return (0)
 
 def isOneMonth(c):
-    if c['time_index'] <= 15: 
+    if c['time_index'] <= 30: 
         return (1)
     else:
         return (0)
