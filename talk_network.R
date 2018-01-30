@@ -1,3 +1,4 @@
+#this code is to calculate the network measure for each node
 ## Load rms package
 library(survminer)
 library(survival)
@@ -6,8 +7,6 @@ library(igraph)
 library(reldist)
 require(lme4)
 #Prepare Data
-setwd("/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data")
-setwd("/Users/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data")
 ######################
 # prepare talk network
 ######################
