@@ -19,10 +19,6 @@ import pickle
 import itertools
 import Wiki_datacollections_all
 
-# read the list of users
-os.chdir("/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data/2014-BLM")
-os.chdir("/Users/Ang/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data/2014-BLM")
-
 #read list of articles
 f = open("articles_full.csv")
 articles = f.readlines()
@@ -349,46 +345,3 @@ for index, row in user_info.iterrows():
 
 user_info['newcomer_mark'] = newcomers_mark
 user_info.to_csv("blm_user_info_newcomers.csv", index=False)
-
-#####block#####block#####block#####block#####block#####block#####block
-editors = pickle.load( open( "user_list_blm_ferg.p", "rb" ) )
-
-user_list = [x for x in editors if x != ""]
-len(user_list)
-
-# collecting block data in case that will affect retention
-blockinfo = {}
-n=0
-for name in user_list:
-    n+=1
-    if n%100==0: print(n)
-    wpid =  name
-    wpid = wpid.strip()
-    #print (rawID)
-    wpid_nospace = wpid.replace(" ","_")
-    #decode student's name into ascii
-    decode_wpid = urllib.parse.quote(wpid_nospace)
-    #api
-    #api_call = ("https://en.wikipedia.org/w/api.php?action=query&list=users&ususers={}&usprop=editcount|blockinfo|registration|rights|groups|gender&format=json").format(decode_wpid)#Kingsleyta
-    api_call = ("https://en.wikipedia.org/w/api.php?action=query&list=users&ususers={}&usprop=blockinfo&format=json").format(decode_wpid)#Kingsleyta
-    response=urllib.request.urlopen(api_call)
-    str_response=response.read().decode('utf-8')
-    responsedata = json.loads(str_response)
-    try:
-        userid = responsedata["query"]["users"][0]['userid']
-        try:
-            userblock=responsedata["query"]["users"][0]['blockid']#list
-            blockinfo[userid] = 1
-        except KeyError:
-            blockinfo[userid] = 0
-    except KeyError: pass
-
-block_data = pd.DataFrame.from_dict(blockinfo, orient='index')
-block_data.reset_index(inplace=True)
-#rename index column
-block_data = block_data.rename(columns={'index': 'userid'})
-
-block_data.to_csv("block_data.csv", index=False)
-       
-
-#https://en.wikipedia.org/w/api.php?action=query&list=users&ususers=Parsley%20Man&usprop=blockinfo
