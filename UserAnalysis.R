@@ -1,5 +1,4 @@
-setwd("/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data")
-setwd("/Users/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data")
+#this code is analysis of user retenion, and edit quality
 require(lme4)
 library(survminer)
 library(survival)
@@ -62,7 +61,7 @@ data  = data[!duplicated(data), ]
 
 #revert summary
 colnames(data)
-length(unique(data$userid)) #504 event newcomers
+length(unique(data$userid)) 
 summary(as.factor(data$reverted))
 #0     1 
 #65538  4902 
