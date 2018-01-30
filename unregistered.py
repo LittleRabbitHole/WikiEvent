@@ -16,9 +16,6 @@ import os
 import urllib
 import pickle
 # read the list of users
-os.chdir("/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data/chal")
-os.chdir("/Users/Ang/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data/chal")
-
 users = pd.read_csv("charlots_allusertype.csv", encoding = "ISO-8859-1")
 users.columns.values
 
