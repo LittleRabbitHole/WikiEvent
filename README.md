@@ -3,6 +3,6 @@ This is a research project for understanding the newcomers behavior in Wikipedia
 
 Analysis is using R; Data collection and pre-processing is using Python
 
-Paper is currently under review.
+Paper is currently under review. Slides overview can be found under this repository.
 
 
