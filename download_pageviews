@@ -15,19 +15,14 @@ if __name__ == "__main__":
     for y in range(2013, 2016): 
         year = '{num:04d}'.format(num=y)
         for m in range(1, 13):
-            month = '{num:02d}'.format(num=m)
-            for d in range(1,31):
-                date = '{num:02d}'.format(num=d)
-                for h in range(24):
-                    hour = '{num:02d}'.format(num=h)
-                    ymd = year+month+date
-                
-                    download_str = "https://dumps.wikimedia.org/other/pagecounts-raw/{}/{}-{}/pagecounts-{}-{}0000.gz".format(year, year, month, ymd,hour)
-                    outString += download_str
-                    outString += '\n'
+            month = '{num:02d}'.format(num=m)                
+            download_str = "https://dumps.wikimedia.org/other/pagecounts-ez/merged/pagecounts-{}-{}-views-ge-5-totals.bz2".format(year, month)
+            outString += download_str
+            outString += '\n'
     
-    with open('/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/Wikidump.txt', 'w') as f:
+    with open('/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/Wikidump_monthly.txt', 'w') as f:
         f.write(outString)
         f.close()
     
-    #wget -i text_file.txt
+#wget -i Wikidump.txt -P /home/angatpitt/wikidumpdata
+#https://dumps.wikimedia.org/other/pagecounts-ez/merged/pagecounts-2014-04-views-ge-5-totals.bz2
