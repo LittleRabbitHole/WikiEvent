@@ -3,6 +3,8 @@
 """
 Created on Tue Apr 10 10:21:11 2018
 
+this is to prepare the aggregated data for 4 month contribution of article pages
+
 @author: angli
 """
 import pandas as pd
@@ -85,7 +87,8 @@ if __name__ == "__main__":
     contri_data.columns.values
     aggre_data = user_aggre(contri_data)
     
-    aggre_data.to_csv("newcomers_4m_aggre_per_person.csv", index=False)
+    user_types = pd.read_csv("Newcomers_groups.csv", encoding="latin-1")
     
-    contri_data["usertype"] = contri_data["usertype"].astype('category')
-    contri_data["usertype"].describe()
+    final_data = pd.merge(user_types, aggre_data, how='left', on=['wpid', 'userid'])
+    
+    final_data.to_csv("newcomers_4m_aggre_per_person.csv", index=False)
