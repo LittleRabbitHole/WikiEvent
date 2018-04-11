@@ -32,6 +32,7 @@ if __name__ == "__main__":
     
     file_loc = "/home/angatpitt/wikidumpdata"
     input_LOCATION_All = "{}/pagecounts-*".format(file_loc)
+    #each around 130,000,000 entries
     
     for file in glob.glob(input_LOCATION_All):
         current = os.path.join(input_LOCATION_All, file)
@@ -47,7 +48,7 @@ if __name__ == "__main__":
             n=0
             for line in infile:
                 n+=1
-                if n%100000==0: print(n)
+                if n%10000000==0: print(n)
                 line_lst = line.strip().split(" ")
                 project = line_lst[0].lower()
                 title = line_lst[1]
