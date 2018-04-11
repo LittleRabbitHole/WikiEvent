@@ -10,6 +10,7 @@ traverse all the pagecount wiki dump and find the articles that listed in the "a
 from __future__ import division
 import glob
 import os
+import argparse
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -19,10 +20,18 @@ _log = logging.getLogger('get_pageview')
 if __name__ == "__main__":
 
     # Global settings
+    # parser
+    parser = argparse.ArgumentParser(description='Input Year')
+    parser.add_argument('-y', '--year', help='input year to locate into correct file location')
+    args = parser.parse_args()
+    year = args.year
+    
+    #logger
     logger = logging.getLogger('get_pageview')
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
     logging.getLogger("requests").setLevel(logging.WARNING)
-
+    
+    #read articles
     f = open("/home/angatpitt/wikievent/all133articles.txt")
     articles = f.readlines()
     f.close()
@@ -30,7 +39,8 @@ if __name__ == "__main__":
     article_list = [article.strip().split("\t")[0] for article in articles]
     event_list = [article.strip().split("\t")[1] for article in articles]
     
-    file_loc = "/home/angatpitt/wikidumpdata"
+    #process the file
+    file_loc = "/home/angatpitt/wikidumpdata/pageview_{}".format(str(year))
     input_LOCATION_All = "{}/pagecounts-*".format(file_loc)
     #each around 130,000,000 entries
     
@@ -67,7 +77,7 @@ if __name__ == "__main__":
         #creating output file
         _log.info("Generating output file {}...".format(filename))
              
-        result_path = '{}/results'.format(file_loc)
+        result_path = '/home/angatpitt/wikidumpdata/results'
         if not os.path.exists(result_path):
             os.makedirs(result_path)
     
