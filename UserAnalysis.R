@@ -5,6 +5,11 @@ library(survival)
 library(KMsurv)
 library(coxme)
 
+setwd("/Users/angli/Documents/GitHub/WikiEvent/data")
+wikidata =  read.csv("newcomers_4m_aggre_per_person.csv")
+wikipedians = wikidata[which(wikidata$first_edit_type3==2),]
+hist(wikipedians$article_sizediff, breaks = 20)
+
 #retention
 data = read.csv("all_survival_final_filtered20.csv")
 colnames(data)
