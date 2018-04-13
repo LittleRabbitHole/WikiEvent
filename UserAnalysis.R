@@ -5,55 +5,102 @@ library(survival)
 library(KMsurv)
 library(coxme)
 
-setwd("/Users/angli/Documents/GitHub/WikiEvent/data")
+setwd("/Users/Ang/Documents/GitHub/WikiEvent/data")
+####merging data###
 wikidata =  read.csv("newcomers_4m_aggre_per_person.csv")
-wikipedians = wikidata[which(wikidata$first_edit_type3==2),]
-hist(wikipedians$article_sizediff, breaks = 20)
+outcome_revert = read.csv("editor_revert.csv")
+network = read.csv("network.csv")
+network = unique(network)
+
+n_occur <- data.frame(table(network$wpid))
+network[network$wpid %in% n_occur$Var1[n_occur$Freq > 1],]
+network <- network[-c(306), ]
+
+wikidata1 = merge(wikidata, network, by = "wpid", all.x = TRUE)
+wikidata2 = merge(wikidata1, outcome_revert, by = c("wpid", "userid"), all.x = TRUE)
+
+write.csv(wikidata2, "wikievent_data.csv", row.names = FALSE)
+####done####
+data =  read.csv("wikievent_data.csv")
+colnames(data)
 
 #retention
-data = read.csv("all_survival_final_filtered20.csv")
-colnames(data)
-#data = data[which(data$event!="FIFA"),]
 table(data$event, data$first_edit_type3)
-newcomers_list = data[c("user","userid")]
+newcomers_list = data[c("wpid","userid")]
 
 data$SurvObj <- with(data, Surv(time, death == 1))
 colnames(data)
 
-data$groupA = -1
-data$groupA[which(data$first_edit_type3==1)] = 2 #for group A
-data$groupC = 0
-data$groupC[which(data$first_edit_type3==2)] = -1 #group B = -1; Group c = 1; group a = 0
-data$groupC[which(data$first_edit_type3==3)] = 1
+data$eventgroup = -1
+data$eventgroup[which(data$first_edit_type3==1)] = 2 #for event
+data$Social = 0
+#data$Social[which(data$first_edit_type3==2)] = -1 #wikipedian
+data$Social[which(data$first_edit_type3==3)] = 1 #social
 
-summary(as.factor(data$groupA))
-summary(as.factor(data$groupC))
+summary(as.factor(data$eventgroup))
+summary(as.factor(data$Social))
+
+data$norm_weighted_Indegree = (data$weighted_Indegree-min(data$weighted_Indegree,na.rm =TRUE))/(max(data$weighted_Indegree,na.rm =TRUE)-min(data$weighted_Indegree,na.rm =TRUE))
+data$norm_weighted_Outdegree = (data$weighted_Outdegree-min(data$weighted_Outdegree,na.rm =TRUE))/(max(data$weighted_Outdegree,na.rm =TRUE)-min(data$weighted_Outdegree,na.rm =TRUE))
+data$norm_betweenness = (data$betweenness-min(data$betweenness,na.rm =TRUE))/(max(data$betweenness,na.rm =TRUE)-min(data$betweenness,na.rm =TRUE))
 
 
-model <- coxph(SurvObj ~ as.factor(groupA) + as.factor(groupC)
-               + cluster(event) + cluster(groupA), 
+model <- coxph(SurvObj ~ as.factor(eventgroup) + as.factor(Social)
+               + norm_weighted_Indegree + norm_weighted_Outdegree
+               #+ Indegree_norm + Outdegree_norm
+               + norm_betweenness #+ closenessnorm
+               + eigen
+               + cluster(event), 
                data = data)
 summary(model) 
 
 #edit quality
-#this is the original/editing history
-data = read.csv("newcomers_contri_quality.csv")
-data = merge(data, newcomers_list, by = c("userid", "user"))
-data  = data[!duplicated(data), ]
-data$groupA = -1
-data$groupA[which(data$user_type==1)] = 2 #for group A
-data$groupC = 0
-data$groupC[which(data$user_type==2)] = -1 #group B = -1; Group c = 1; group a = 0
-data$groupC[which(data$user_type==3)] = 1
-
-colnames(data)
-summary(data$event)
-
-model = lmer(prob.true ~ as.factor(groupA) + as.factor(groupC) + (1|event) + (1|userid), data = data)
+model = lmer(ave_true ~ as.factor(eventgroup) + as.factor(Social) 
+             + norm_weighted_Indegree + norm_weighted_Outdegree
+             #+ Indegree_norm + Outdegree_norm
+             + norm_betweenness #+ closenessnorm
+             + eigen
+             #+ article_edits 
+             #+ unique_articles 
+             + (1|event)
+             , data = data)
 summary(model)
 
-data_BLM = data[which(data$event=='blm'),] 
-model = lmer(prob.true ~ as.factor(groupA) + as.factor(groupC) + (1|userid), data = data_BLM)
+
+##production
+model = lmer(log(article_edits+0.01) ~ as.factor(eventgroup) + as.factor(Social) 
+             + norm_weighted_Indegree + norm_weighted_Outdegree
+             #+ Indegree_norm + Outdegree_norm
+             + norm_betweenness #+ closenessnorm
+             + eigen
+             #+ article_edits 
+             #+ unique_articles 
+             + (1|event)
+             , data = data)
+summary(model)
+
+#article size
+model = lmer(scale(article_sizediff) ~ as.factor(eventgroup) + as.factor(Social) 
+             + norm_weighted_Indegree + norm_weighted_Outdegree
+             #+ Indegree_norm + Outdegree_norm
+             + norm_betweenness #+ closenessnorm
+             + eigen
+             #+ article_edits 
+             #+ unique_articles 
+             + (1|event)
+             , data = data)
+summary(model)
+
+#revert
+model = lmer(scale(revert_ratio) ~ as.factor(eventgroup) + as.factor(Social) 
+             + norm_weighted_Indegree + norm_weighted_Outdegree
+             #+ Indegree_norm + Outdegree_norm
+             + norm_betweenness #+ closenessnorm
+             + eigen
+             + log(article_edits+0.01) 
+             + log(unique_articles +0.01)
+             + (1|event)
+             , data = data)
 summary(model)
 
 
