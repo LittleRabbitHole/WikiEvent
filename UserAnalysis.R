@@ -140,6 +140,21 @@ model = lmer(ave_good_3ms ~ as.factor(eventgroup) + as.factor(Social)
 summary(model)
 
 
+model = lmer(revert_ratio ~ as.factor(eventgroup) + as.factor(Social) 
+             + norm_weighted_Indegree + norm_weighted_Outdegree
+             #+ Indegree_norm + Outdegree_norm
+             + norm_betweenness #+ closenessnorm
+             + eigen
+             + log(before_talk_count + 0.01) 
+             + log(before_user_count + 0.01)
+             + log(before_usertalk_count + 0.01)
+             #+ log(article_edits + 0.01) 
+             #+ log(unique_articles + 0.01) 
+             + (1|event)
+             , data = data)
+summary(model)
+
+
 #revert
 data = read.csv("/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data/newcomers_revert_factors.csv")
 data = data[which(data$reverted %in% c(0,1)),]
@@ -159,26 +174,21 @@ data$norm_weighted_Indegree = (data$weighted_Indegree-min(data$weighted_Indegree
 data$norm_weighted_Outdegree = (data$weighted_Outdegree-min(data$weighted_Outdegree,na.rm =TRUE))/(max(data$weighted_Outdegree,na.rm =TRUE)-min(data$weighted_Outdegree,na.rm =TRUE))
 data$norm_betweenness = (data$betweenness-min(data$betweenness,na.rm =TRUE))/(max(data$betweenness,na.rm =TRUE)-min(data$betweenness,na.rm =TRUE))
 data$reverted = as.factor(data$reverted)
-data$before_talk_norm = log(data$before_talk_count + 0.01) 
-data$before_talk_norm = (data$before_talk_norm-min(data$before_talk_norm,na.rm =TRUE))/(max(data$before_talk_norm,na.rm =TRUE)-min(data$before_talk_norm,na.rm =TRUE))
-data$before_user_norm = log(data$before_user_count + 0.01) 
-data$before_user_norm = (data$before_user_norm-min(data$before_user_norm,na.rm =TRUE))/(max(data$before_user_norm,na.rm =TRUE)-min(data$before_user_norm,na.rm =TRUE))
-data$before_usertalk_norm = log(data$before_usertalk_count + 0.01) 
-data$before_usertalk_norm = (data$before_usertalk_norm-min(data$before_usertalk_norm,na.rm =TRUE))/(max(data$before_usertalk_norm,na.rm =TRUE)-min(data$before_usertalk_norm,na.rm =TRUE))
 
 model = glmer(reverted ~ as.factor(eventgroup) + as.factor(Social) 
              + norm_weighted_Indegree + norm_weighted_Outdegree
              #+ Indegree_norm + Outdegree_norm
              + norm_betweenness #+ closenessnorm
              + eigen
-             + log(before_talk_norm + 0.01) 
-             + log(before_user_norm + 0.01)
-             + log(before_usertalk_norm + 0.01)
-             #+ log(before_unique_articles +0.01)
-             #+  (1|event_y) 
+             + log(before_talk_count + 0.001) 
+             + log(before_user_count + 0.001)
+             + log(before_usertalk_count + 0.001)
+             + log(before_article_count +0.001)
+             #+ (1|event_y) 
              + (1|userid)
-             , family = binomial
+             , family = binomial , nAGQ = 1
              , data = data)
+
 summary(model)
 
 
