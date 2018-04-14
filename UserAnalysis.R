@@ -6,6 +6,7 @@ library(KMsurv)
 library(coxme)
 
 setwd("/Users/angli/Documents/GitHub/WikiEvent/data")
+setwd("/Users/Ang/Documents/GitHub/WikiEvent/data")
 ####merging data###
 wikidata =  read.csv("first_30days_factors_all.csv")
 outcome_revert = read.csv("editor_revert.csv")
