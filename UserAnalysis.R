@@ -4,6 +4,7 @@ library(survminer)
 library(survival)
 library(KMsurv)
 library(coxme)
+library(dprep)
 
 setwd("/Users/angli/Documents/GitHub/WikiEvent/data")
 setwd("/Users/Ang/Documents/GitHub/WikiEvent/data")
@@ -22,8 +23,26 @@ wikidata2 = merge(wikidata1, outcome_revert, by = c("wpid", "userid"), all.x = T
 
 write.csv(wikidata1, "wikievent_data_production.csv", row.names = FALSE)
 ####done####
-data =  read.csv("wikievent_data_production.csv")
-colnames(data)
+#####behavior##########
+bdata = read.csv("first_30days_factors_all.csv")
+colnames(bdata)
+bdata = bdata[which(bdata$event_newcomers==1),]
+
+wiki = bdata[which(bdata$first_edit_type3==2),]
+median(wiki$before_unique_articles, na.rm = TRUE)
+median(wiki$before_talk_count, na.rm = TRUE)
+median(wiki$before_usertalk_count, na.rm = TRUE)
+median(wiki$before_user_count, na.rm = TRUE)
+
+social = bdata[which(bdata$first_edit_type3==3),]
+median(social$article_edits, na.rm = TRUE)
+median(social$article_sizediff, na.rm = TRUE)
+median(social$unique_articles, na.rm = TRUE)
+
+event = bdata[which(bdata$first_edit_type3==1),]
+median(event$article_edits, na.rm = TRUE)
+median(event$article_sizediff, na.rm = TRUE)
+median(event$unique_articles, na.rm = TRUE)
 
 ######retention########
 data =  read.csv("wikievent_retention.csv")
@@ -44,21 +63,39 @@ summary(as.factor(data$Social))
 
 data$norm_weighted_Indegree = (data$weighted_Indegree-min(data$weighted_Indegree,na.rm =TRUE))/(max(data$weighted_Indegree,na.rm =TRUE)-min(data$weighted_Indegree,na.rm =TRUE))
 data$norm_weighted_Outdegree = (data$weighted_Outdegree-min(data$weighted_Outdegree,na.rm =TRUE))/(max(data$weighted_Outdegree,na.rm =TRUE)-min(data$weighted_Outdegree,na.rm =TRUE))
+
 data$norm_betweenness = (data$betweenness-min(data$betweenness,na.rm =TRUE))/(max(data$betweenness,na.rm =TRUE)-min(data$betweenness,na.rm =TRUE))
 #data$edit_count = log(data$before_edit_count +  data$after_edit_count + 0.01)
 
 model <- coxph(SurvObj ~ as.factor(eventgroup) + as.factor(Social)
                + norm_weighted_Indegree + norm_weighted_Outdegree
                #+ Indegree_norm + Outdegree_norm
-               + norm_betweenness #+ closeness_norm
-               + eigen
-               + log(before_article_count+0.01)
+               #+ norm_betweenness #+ closeness_norm
+               + scale(eigen)
+               #+ log(before_article_count+0.01)
+               + log(before_unique_articles+0.01)
                + log(before_talk_count + 0.01) 
                + log(before_user_count + 0.01)
                + log(before_usertalk_count + 0.01)
                + cluster(event), 
                data = data)
 summary(model) 
+
+model <- coxme(SurvObj ~ as.factor(eventgroup) + as.factor(Social)
+               + norm_weighted_Indegree + norm_weighted_Outdegree
+               #+ Indegree_norm + Outdegree_norm
+               #+ norm_betweenness #+ closeness_norm
+               + eigen
+               + log(before_article_count+0.01)
+               + log(before_unique_articles+0.01)
+               + log(before_talk_count + 0.01) 
+               + log(before_user_count + 0.01)
+               #+ log(before_usertalk_count + 0.01)
+               + (1|event),
+               ties = "breslow",
+               data = data)
+summary(model) 
+
 
 ##production
 data =  read.csv("wikievent_data_production.csv")
@@ -76,21 +113,26 @@ summary(as.factor(data$Social))
 data$norm_weighted_Indegree = (data$weighted_Indegree-min(data$weighted_Indegree,na.rm =TRUE))/(max(data$weighted_Indegree,na.rm =TRUE)-min(data$weighted_Indegree,na.rm =TRUE))
 data$norm_weighted_Outdegree = (data$weighted_Outdegree-min(data$weighted_Outdegree,na.rm =TRUE))/(max(data$weighted_Outdegree,na.rm =TRUE)-min(data$weighted_Outdegree,na.rm =TRUE))
 data$norm_betweenness = (data$betweenness-min(data$betweenness,na.rm =TRUE))/(max(data$betweenness,na.rm =TRUE)-min(data$betweenness,na.rm =TRUE))
+data$norm_talk_count = log(data$before_talk_count + 0.001)
+data$norm_user_count  = log(data$before_user_count + 0.001)
+data$norm_usertalk_count  = log(data$before_usertalk_count + 0.001)
+data$norm_unique_articles  = log(data$before_unique_articles + 0.001)
 
-model = lmer(log(after_article_count+0.01) ~ as.factor(eventgroup) 
+model = lmer(log(after_article_count+0.001) ~ as.factor(eventgroup) 
              + as.factor(Social) 
              #+ as.factor(Wikipedia)
              + norm_weighted_Indegree + norm_weighted_Outdegree
              #+ Indegree_norm + Outdegree_norm
-             + norm_betweenness #+ closenessnorm
+             #+ norm_betweenness #+ closenessnorm
              + eigen
-             + log(before_talk_count + 0.01) 
-             + log(before_user_count + 0.01)
-             + log(before_usertalk_count + 0.01)
+             + norm_talk_count 
+             + norm_user_count
+             #+ norm_usertalk_count
+             + norm_unique_articles
              + (1|event)
              , data = data)
 summary(model)
-dt(1.714, df=length(data) - 1)
+dt(2.5, df=length(data) - 1)
 
 #article size
 model = lmer(scale(after_article_sizediff) ~ as.factor(eventgroup)
@@ -98,15 +140,17 @@ model = lmer(scale(after_article_sizediff) ~ as.factor(eventgroup)
              #+ as.factor(Wikipedia)
              + norm_weighted_Indegree + norm_weighted_Outdegree
              #+ Indegree_norm + Outdegree_norm
-             + norm_betweenness #+ closenessnorm
+             #+ norm_betweenness #+ closenessnorm
              + eigen
-             + log(before_talk_count + 0.01) 
-             + log(before_user_count + 0.01)
-             + log(before_usertalk_count + 0.01)
+             + norm_talk_count 
+             + norm_user_count
+             #+ norm_usertalk_count
+             + norm_unique_articles
              + (1|event)
              , data = data)
 
 summary(model)
+dt(-2.533, df=length(data) - 1)
 
 
 #######edit quality
@@ -129,13 +173,13 @@ data$norm_betweenness = (data$betweenness-min(data$betweenness,na.rm =TRUE))/(ma
 model = lmer(ave_good_3ms ~ as.factor(eventgroup) + as.factor(Social) 
              + norm_weighted_Indegree + norm_weighted_Outdegree
              #+ Indegree_norm + Outdegree_norm
-             + norm_betweenness #+ closenessnorm
+             #+ norm_betweenness #+ closenessnorm
              + eigen
              + log(before_talk_count + 0.01) 
              + log(before_user_count + 0.01)
-             + log(before_usertalk_count + 0.01)
+             #+ log(before_usertalk_count + 0.01)
              + log(article_edits + 0.01) 
-             #+ log(unique_articles + 0.01) 
+             + log(unique_articles + 0.01) 
              + (1|event)
              , data = data)
 summary(model)
@@ -144,11 +188,11 @@ summary(model)
 model = lmer(revert_ratio ~ as.factor(eventgroup) + as.factor(Social) 
              + norm_weighted_Indegree + norm_weighted_Outdegree
              #+ Indegree_norm + Outdegree_norm
-             + norm_betweenness #+ closenessnorm
+             #+ norm_betweenness #+ closenessnorm
              + eigen
              + log(before_talk_count + 0.01) 
              + log(before_user_count + 0.01)
-             + log(before_usertalk_count + 0.01)
+             #+ log(before_usertalk_count + 0.01)
              #+ log(article_edits + 0.01) 
              #+ log(unique_articles + 0.01) 
              + (1|event)
