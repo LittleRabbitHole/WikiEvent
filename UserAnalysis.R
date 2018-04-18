@@ -76,7 +76,7 @@ model <- coxph(SurvObj ~ as.factor(eventgroup) + as.factor(Social)
                + log(before_unique_articles+0.01)
                + log(before_talk_count + 0.01) 
                + log(before_user_count + 0.01)
-               + log(before_usertalk_count + 0.01)
+               #+ log(before_usertalk_count + 0.01)
                + cluster(event), 
                data = data)
 summary(model) 
@@ -86,7 +86,7 @@ model <- coxme(SurvObj ~ as.factor(eventgroup) + as.factor(Social)
                #+ Indegree_norm + Outdegree_norm
                #+ norm_betweenness #+ closeness_norm
                + eigen
-               + log(before_article_count+0.01)
+               #+ log(before_article_count+0.01)
                + log(before_unique_articles+0.01)
                + log(before_talk_count + 0.01) 
                + log(before_user_count + 0.01)
@@ -146,6 +146,7 @@ model = lmer(scale(after_article_sizediff) ~ as.factor(eventgroup)
              + norm_user_count
              #+ norm_usertalk_count
              + norm_unique_articles
+             #+ log(before_article_count+0.001)
              + (1|event)
              , data = data)
 
@@ -178,11 +179,23 @@ model = lmer(ave_good_3ms ~ as.factor(eventgroup) + as.factor(Social)
              + log(before_talk_count + 0.01) 
              + log(before_user_count + 0.01)
              #+ log(before_usertalk_count + 0.01)
-             + log(article_edits + 0.01) 
+             #+ log(article_edits + 0.01) 
              + log(unique_articles + 0.01) 
              + (1|event)
              , data = data)
 summary(model)
+
+group1_revert = data$ave_good_3ms[which(data$revert_count>0 & data$first_edit_type3==1)]
+hist(group1_revert, breaks=20)
+mean(group1_revert)
+median(group1_revert)
+
+group2_revert = data$ave_good_3ms[which(data$revert_count>0 & data$first_edit_type3==2)]
+hist(group2_revert)
+
+group3_revert = data$ave_good_3ms[which(data$revert_count>0 & data$first_edit_type3==3)]
+hist(group3_revert)
+
 
 
 model = lmer(revert_ratio ~ as.factor(eventgroup) + as.factor(Social) 
@@ -194,6 +207,21 @@ model = lmer(revert_ratio ~ as.factor(eventgroup) + as.factor(Social)
              + log(before_user_count + 0.01)
              #+ log(before_usertalk_count + 0.01)
              #+ log(article_edits + 0.01) 
+             #+ log(unique_articles + 0.01) 
+             + (1|event)
+             , data = data)
+summary(model)
+
+data$reverted = data$revert_count_3ms >=1
+model = lmer(log(revert_count_3ms+0.01) ~ as.factor(eventgroup) + as.factor(Social) 
+             + norm_weighted_Indegree + norm_weighted_Outdegree
+             #+ Indegree_norm + Outdegree_norm
+             #+ norm_betweenness #+ closenessnorm
+             + eigen
+             + log(before_talk_count + 0.01) 
+             + log(before_user_count + 0.01)
+             #+ log(before_usertalk_count + 0.01)
+             + log(article_edits + 0.01) 
              #+ log(unique_articles + 0.01) 
              + (1|event)
              , data = data)
