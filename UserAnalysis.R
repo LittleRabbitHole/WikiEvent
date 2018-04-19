@@ -234,7 +234,7 @@ summary(model)
 
 
 #revert
-data = read.csv("/Users/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data/newcomers_revert_factors.csv")
+data = read.csv("/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data/newcomers_revert_factors.csv")
 data = data[which(data$reverted %in% c(0,1)),]
 colnames(data)
 data$eventgroup = -1
