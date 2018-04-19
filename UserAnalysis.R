@@ -177,7 +177,7 @@ model = lmer(ave_good_3ms ~ as.factor(eventgroup) + as.factor(Social)
              + eigen
              + log(before_talk_count + 0.01) 
              + log(before_user_count + 0.01)
-             #+ log(before_usertalk_count + 0.01)
+             + log(before_usertalk_count + 0.01)
              + log(article_edits + 0.01) 
              + log(unique_articles + 0.01) 
              + (1|event)
@@ -185,7 +185,7 @@ model = lmer(ave_good_3ms ~ as.factor(eventgroup) + as.factor(Social)
 summary(model)
 
 
-model = lmer(revert_ratio ~ as.factor(eventgroup) + as.factor(Social) 
+model = lmer(scale(revert_ratio) ~ as.factor(eventgroup) + as.factor(Social) 
              + norm_weighted_Indegree + norm_weighted_Outdegree
              #+ Indegree_norm + Outdegree_norm
              #+ norm_betweenness #+ closenessnorm
@@ -201,7 +201,7 @@ summary(model)
 
 
 #revert
-data = read.csv("/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data/newcomers_revert_factors.csv")
+data = read.csv("/Users/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data/newcomers_revert_factors.csv")
 data = data[which(data$reverted %in% c(0,1)),]
 colnames(data)
 data$eventgroup = -1
@@ -223,15 +223,16 @@ data$reverted = as.factor(data$reverted)
 model = glmer(reverted ~ as.factor(eventgroup) + as.factor(Social) 
              + norm_weighted_Indegree + norm_weighted_Outdegree
              #+ Indegree_norm + Outdegree_norm
-             + norm_betweenness #+ closenessnorm
+             #+ norm_betweenness #+ closenessnorm
              + eigen
              + log(before_talk_count + 0.001) 
              + log(before_user_count + 0.001)
-             + log(before_usertalk_count + 0.001)
+             #+ log(before_usertalk_count + 0.001)
              + log(before_article_count +0.001)
-             #+ (1|event_y) 
+             +log(before_unique_articles+0.001)
+             + (1|event_y) 
              + (1|userid)
-             , family = binomial , nAGQ = 1
+             , family = binomial , nAGQ = 0
              , data = data)
 
 summary(model)
