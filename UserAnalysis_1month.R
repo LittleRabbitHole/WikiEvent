@@ -178,13 +178,8 @@ model = lmer(ave_good_3ms ~ as.factor(eventgroup) + as.factor(Social)
              + eigen
              + log(before_talk_count + 0.01) 
              + log(before_user_count + 0.01)
-<<<<<<< HEAD
-             + log(before_usertalk_count + 0.01)
-             + log(article_edits + 0.01) 
-=======
              #+ log(before_usertalk_count + 0.01)
-             #+ log(article_edits + 0.01) 
->>>>>>> 9eca01f7250623327961902a3beaa1788c2c2a37
+             + log(article_edits + 0.01) 
              + log(unique_articles + 0.01) 
              + (1|event)
              , data = data)
