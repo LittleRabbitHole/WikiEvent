@@ -1,4 +1,3 @@
-#this code is to calculate the network measure for each node
 ## Load rms package
 library(survminer)
 library(survival)
@@ -7,27 +6,29 @@ library(igraph)
 library(reldist)
 require(lme4)
 #Prepare Data
+setwd("/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data")
+setwd("/Users/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Event/data")
 ######################
 # prepare talk network
 ######################
 
-all_ids = read.csv("talk_nodes.csv") #18338 in total
-all_edge = read.csv("talk_edges.csv") 
+all_edge = read.csv("takepage_edges_1w.csv") #18338 in total
+all_ids = read.csv("takepage_ids_1w_full.csv") 
 #session_edge = all_edge
 colnames(all_ids)
 colnames(all_edge)
 
 #session_edge = all_edge
-talk_net <- function(session_edge){
+talk_net <- function(session_edge, all_ids){
   #this function is to general the network
-  session_net = graph.edgelist(cbind(session_edge$source, session_edge$target), directed=TRUE) 
+  session_net = graph.data.frame(cbind(session_edge$source, session_edge$target), vertices = all_ids$ID, directed = T) 
   fullEdges = length(E(session_net))
   V(session_net)$wpid = as.character(all_ids$wpid)
-  V(session_net)$label = as.character(all_ids$label)
+  V(session_net)$label = as.character(all_ids$wpid)
   V(session_net)$id = as.character(all_ids$ID)
-  V(session_net)$first_edit = as.character(all_ids$first_edit)
-  V(session_net)$from_event = all_ids$from_event
-  V(session_net)$final_check = all_ids$final_check
+  V(session_net)$user_type = as.character(all_ids$user_type)
+  #V(session_net)$from_event = all_ids$from_event
+  #V(session_net)$final_check = all_ids$final_check
   #session1: IGRAPH D-W- 16287 17321 --
   E(session_net)$weight = session_edge$weight
   
@@ -35,25 +36,26 @@ talk_net <- function(session_edge){
   return (session_net)
 }
 
-#results for talk network
+#results for three sessions
 
-session_all.net = talk_net(all_edge)
+session_all.net = talk_net(all_edge, all_ids)
 session_all.net = simplify(session_all.net, remove.multiple = FALSE, remove.loops = TRUE) #remove self loop
 session_all.net = delete_vertices(session_all.net, which(V(session_all.net)$final_check==0))
 V(session_all.net)$degree = degree(session_all.net, mode="all",normalized = FALSE)
 session_all.net = delete_vertices(session_all.net, which(V(session_all.net)$degree==0 & V(session_all.net)$from_event==0))
 
 summary(session_all.net) 
-#IGRAPH D-W- 1991 1801 -- 
-#+ attr: wpid (v/c), label (v/c), id (v/c), first_edit (v/c), from_event (v/c), weight (e/n)
+#IGRAPH DNW- 1157 796 -- 
+#  + attr: wpid (v/c), label (v/c), id (v/c), user_type (v/c), degree (v/n), weight (e/n)
 
-write_graph(session_all.net, "event_talk_net.graphmlphml", format ="graphml")
+
+write_graph(session_all.net, "event_talk_net_1w.graphml", format ="graphml")
 #write_graph(session1_student_edge.net, "session1_student_edge_20152016_0523.graphml", format ="graphml")
 
 edge.net = session_all.net
-mean(transitivity(edge.net, type="local"), na.rm = TRUE)
-mean(strength(edge.net, mode = "total"), na.rm = TRUE)
-mean(eigen_centrality(edge.net, weights = E(edge.net)$weight)$vector, na.rm = TRUE)
+#mean(transitivity(edge.net, type="local"), na.rm = TRUE)
+#mean(strength(edge.net, mode = "total"), na.rm = TRUE)
+#mean(eigen_centrality(edge.net, weights = E(edge.net)$weight)$vector, na.rm = TRUE)
 
 #network measures
 network_output <- function(edge.net){
@@ -62,13 +64,13 @@ network_output <- function(edge.net){
   wpid = V(edge.net)$wpid
   label = V(edge.net)$label
   ID =  V(edge.net)$id
-  first_edit =  V(edge.net)$first_edit
-  from_event =  V(edge.net)$from_event
-  transitivity = transitivity(edge.net, type="local")
-  betweenness = betweenness(edge.net,weights = E(edge.net)$weight, normalized = FALSE)
-  betweenness_norm = betweenness(edge.net,weights = E(edge.net)$weight, normalized = TRUE)
-  closeness = closeness(edge.net,weights = E(edge.net)$weight, normalized = FALSE)
-  closeness_norm = closeness(edge.net,weights = E(edge.net)$weight, normalized = TRUE)
+  first_edit_type3 =  V(edge.net)$user_type
+  #from_event =  V(edge.net)$from_event
+  #transitivity = transitivity(edge.net, type="local")
+  #betweenness = betweenness(edge.net,weights = E(edge.net)$weight, normalized = FALSE)
+  #betweenness_norm = betweenness(edge.net,weights = E(edge.net)$weight, normalized = TRUE)
+  #closeness = closeness(edge.net,weights = E(edge.net)$weight, normalized = FALSE)
+  #closeness_norm = closeness(edge.net,weights = E(edge.net)$weight, normalized = TRUE)
   degree = degree(edge.net, mode="all",normalized = FALSE)
   degree_norm = degree(edge.net, mode="all",normalized = TRUE)
   Indegree = degree(edge.net, mode="in",normalized = FALSE)
@@ -79,9 +81,8 @@ network_output <- function(edge.net){
   weighted_Indegree = strength(edge.net, mode = "in", weights = E(edge.net)$weight)
   weighted_Outdegree = strength(edge.net, mode = "out", weights = E(edge.net)$weight)
   eigen = eigen_centrality(edge.net, weights = E(edge.net)$weight)$vector
-  net_measure = cbind(ID, label, wpid, first_edit, from_event, transitivity, 
-                      betweenness, betweenness_norm, 
-                      closeness, closeness_norm, degree, degree_norm, Indegree, Indegree_norm, 
+  net_measure = cbind(ID, label, wpid, first_edit_type3, 
+                      degree, degree_norm, Indegree, Indegree_norm, 
                       Outdegree, Outdegree_norm, weighted_degree, weighted_Indegree, weighted_Outdegree, eigen) 
   return (net_measure)
 }
@@ -89,12 +90,11 @@ network_output <- function(edge.net){
 
 all_net_measure = data.frame(network_output(edge.net))
 colnames(all_net_measure)
-colnames(all_net_measure) = c("ID", "label", "wpid", "first_edit", "from_event", "transitivity", 
-                              "betweenness", "betweenness_norm", 
-                              "closeness", "closeness_norm", "degree", "degree_norm", "Indegree", "Indegree_norm", 
+colnames(all_net_measure) = c("ID", "label", "wpid", "first_edit_type3",
+                               "degree", "degree_norm", "Indegree", "Indegree_norm", 
                               "Outdegree", "Outdegree_norm", "weighted_degree","weighted_Indegree", "weighted_Outdegree", "eigen")
 
-write.csv(all_net_measure, "talk_network_measure_data.csv", na = "",row.names = FALSE)
+write.csv(all_net_measure, "talk_network_measure_1w_data.csv", na = "",row.names = FALSE)
 
 ####analysis
 all_net_measure = read.csv("talk_network_measure_data.csv")
