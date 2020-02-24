@@ -76,7 +76,7 @@ write.csv(wikidata_rpq, "wikievent_full_data.csv", row.names = FALSE)
 data = read.csv("wikievent_full_data.csv")
 colnames(data)
 
-######retention########
+######retention, survival analysis########
 table(data$event, data$first_edit_type3)
 #newcomers_list = data[c("wpid","userid")]
 
@@ -100,23 +100,14 @@ data$norm_weighted_Outdegree = (data$weighted_Outdegree-min(data$weighted_Outdeg
 data$event_indegree = data$eventgroup*data$norm_weighted_Indegree
 data$event_outdegree = data$eventgroup*data$norm_weighted_Outdegree
 data$event_eigen = data$eventgroup*data$eigen
-#data$norm_betweenness = (data$betweenness-min(data$betweenness,na.rm =TRUE))/(max(data$betweenness,na.rm =TRUE)-min(data$betweenness,na.rm =TRUE))
-#data$edit_count = log(data$before_edit_count +  data$after_edit_count + 0.01)
 
 model <- coxph(SurvObj ~ as.factor(eventgroup) 
-               #+ as.factor(Social)
                + norm_weighted_Indegree 
                + norm_weighted_Outdegree
-               #+ Indegree_norm + Outdegree_norm
-               #+ norm_betweenness #+ closeness_norm
                + scale(eigen)
-               #+ log(before_article_count+0.01)
                + log(before_unique_articles+0.01)
                + log(before_talk_count + 0.01) 
                + log(before_user_count + 0.01)
-               #+ before_ave_true
-               #+ before_revert_ratio
-               #+ log(before_usertalk_count + 0.01)
                + event_indegree
                +event_outdegree
                +event_eigen
@@ -127,19 +118,12 @@ summary(model)
 
 
 model <- coxme(SurvObj ~ as.factor(eventgroup) 
-               #+ as.factor(Social)
                + norm_weighted_Indegree 
                + norm_weighted_Outdegree
-               #+ Indegree_norm + Outdegree_norm
-               #+ norm_betweenness #+ closeness_norm
                + scale(eigen)
-               #+ log(before_article_count+0.01)
                + log(before_unique_articles+0.01)
                + log(before_talk_count + 0.01) 
                + log(before_user_count + 0.01)
-               #+ before_ave_true
-               #+ before_revert_ratio
-               #+ log(before_usertalk_count + 0.01)
                + log(before_revert_count + 0.01)
                + (1|event), 
                data = data)
@@ -152,21 +136,14 @@ data$norm_usertalk_count  = log(data$before_usertalk_count + 0.01)
 data$norm_unique_articles  = log(data$before_unique_articles + 0.01)
 
 model = lmer(log(after_article_count+0.01) ~ as.factor(eventgroup) 
-             #+ as.factor(Social) 
-             #+ as.factor(Wikipedia)
              + norm_weighted_Indegree + norm_weighted_Outdegree
-             #+ Indegree_norm + Outdegree_norm
-             #+ norm_betweenness #+ closenessnorm
              + eigen
              + norm_talk_count 
              + norm_user_count
-             #+ norm_usertalk_count
              + norm_unique_articles
              + event_indegree
              +event_outdegree
              +event_eigen
-             #+ before_ave_true
-             #+ scale(before_revert_ratio)
              + log(before_revert_count + 0.01)
              + (1|event)
              , data = data)
@@ -175,20 +152,11 @@ dt(1.517, df=length(data) - 1)
 
 #article size
 model = lmer(scale(after_article_sizediff) ~ as.factor(eventgroup)
-             #+ as.factor(Social) 
-             #+ as.factor(Wikipedia)
              + norm_weighted_Indegree + norm_weighted_Outdegree
-             #+ Indegree_norm + Outdegree_norm
-             #+ norm_betweenness #+ closenessnorm
              + eigen
              + norm_talk_count 
              + norm_user_count
-             #+ norm_usertalk_count
              + norm_unique_articles
-             #+ log(before_article_count+0.01)
-             #+ before_ave_true
-             #+ scale(before_revert_ratio)
-             #+ log(before_revert_count + 0.01)
              + event_indegree
              +event_outdegree
              +event_eigen
@@ -200,18 +168,12 @@ dt(2.01, df=length(data) - 1)
 
 #quality
 model = lmer(scale(after_ave_true) ~ as.factor(eventgroup) 
-             #+ as.factor(Social) 
              + norm_weighted_Indegree + norm_weighted_Outdegree
-             #+ Indegree_norm + Outdegree_norm
-             #+ norm_betweenness #+ closenessnorm
              + eigen
              + norm_talk_count 
              + norm_user_count
-             #+ norm_usertalk_count
              + norm_unique_articles
              + log(before_article_count+0.01)
-             #+ before_ave_true
-             #+ before_revert_ratio
              + log(before_revert_count + 0.01)
              + (1|event)
              , data = data)
@@ -219,21 +181,14 @@ summary(model)
 
 
 model = lmer(scale(after_revert_ratio) ~ as.factor(eventgroup) 
-             #+ as.factor(Social) 
              + norm_weighted_Indegree + norm_weighted_Outdegree
-             #+ Indegree_norm + Outdegree_norm
-             #+ norm_betweenness #+ closenessnorm
              + eigen
              + norm_talk_count 
              + norm_user_count
-             #+ norm_usertalk_count
              + norm_unique_articles
              + log(before_article_count+0.01)
-             #+ before_ave_true
-             #+ before_revert_ratio
              + log(before_revert_count + 0.01)
              + (1|event)
-             #,family = poisson
              , data = data)
 summary(model)
 
@@ -243,19 +198,13 @@ data$reverted = data$after_revert_count >=1
 model = lmer(log(after_revert_count + 0.01) ~ as.factor(eventgroup) 
              + as.factor(Social) 
              + norm_weighted_Indegree + norm_weighted_Outdegree
-             #+ Indegree_norm + Outdegree_norm
-             #+ norm_betweenness #+ closenessnorm
              + eigen
              + norm_talk_count 
              + norm_user_count
-             #+ norm_usertalk_count
              + norm_unique_articles
              + log(after_article_count+0.01)
-             #+ before_ave_true
-             #+ before_revert_ratio
              + log(before_revert_count + 0.01)
              + (1|event)
-             #, family = binomial
              , data = data)
 summary(model)
 
