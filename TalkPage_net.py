@@ -3,7 +3,7 @@
 Created on Sat Nov 19 09:52:07 2016
 Last updated: 4/19/2018
 
-this includes the whole process from incoming/outgoing talk page contribution data collected from API to generate the talk net
+this includes the steps from incoming/outgoing talk page contribution data collected from API to generate the talk net
 
 @author: angli
 """
